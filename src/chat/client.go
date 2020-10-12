@@ -2,7 +2,9 @@ package chat
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +14,8 @@ import (
 type Client struct {
 	hub *Hub
 	conn *websocket.Conn
-	send chan []byte
+	send chan *model.Message
+	uid string
 }
 
 const (
@@ -48,7 +51,7 @@ func (c *Client) readFromStream()  {
 	})
 
 	for  {
-		_, message, err := c.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
@@ -58,7 +61,11 @@ func (c *Client) readFromStream()  {
 		}
 
 		//将全部换行符替换成空格，最后去除
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
+		fmt.Printf("msg: %s", string(msg))
+		message := &model.Message{}
+		message.RoomID = 1
+		message.Text = string(msg)
 		c.hub.broadcast <- message
 	}
 }
@@ -85,7 +92,7 @@ func (c *Client) writeToStream()  {
 				return
 			}
 
-			_, _ = w.Write(message)
+			_, _ = w.Write([]byte(message.PostMessage.Text))
 
 			if err := w.Close(); err != nil {
 				return
@@ -94,14 +101,24 @@ func (c *Client) writeToStream()  {
 	}
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r http.Request)  {
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request)  {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send:make(chan []byte, 256)}
+	param := r.URL.Query()
+
+	uid := ""
+	if param["uid"] != nil && len(param["uid"]) > 0 {
+		uid = param["uid"][0]
+	}else {
+		log.Println("uid is need.")
+		return
+	}
+
+	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message), uid: uid}
 	client.hub.register <- client
 
 	go client.readFromStream()
