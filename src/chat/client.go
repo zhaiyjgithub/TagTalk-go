@@ -21,7 +21,7 @@ type Client struct {
 const (
 	writeWait = 10 * time.Second
 	pongWait = 60 * time.Second
-	pingPeriod = (pongWait * 9)/ 10
+	pingPeriod = (pongWait * 9)/ 10 //接近timeout，就发送一个ping message到App
 	maxMessageSize = 512
 )
 
@@ -97,6 +97,13 @@ func (c *Client) writeToStream()  {
 			if err := w.Close(); err != nil {
 				return
 			}
+
+		case <-ticker.C:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+
 		}
 	}
 }
@@ -118,7 +125,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message), uid: uid}
+	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: uid}
 	client.hub.register <- client
 
 	go client.readFromStream()

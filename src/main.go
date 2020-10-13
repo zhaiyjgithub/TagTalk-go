@@ -1,13 +1,10 @@
 package main
 
 import (
-	"flag"
 	"github.com/zhaiyjgithub/TagTalk-go/src/chat"
 	"log"
 	"net/http"
 )
-
-var addr = flag.String("addr", ":8080", "http service address")
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -29,7 +26,7 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chat.ServeWs(hub, w, r)
 	})
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8088", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
