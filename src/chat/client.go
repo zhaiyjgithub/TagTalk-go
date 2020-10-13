@@ -2,7 +2,6 @@ package chat
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"log"
@@ -62,7 +61,6 @@ func (c *Client) readFromStream()  {
 
 		//将全部换行符替换成空格，最后去除
 		msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
-		fmt.Printf("msg: %s", string(msg))
 		message := &model.Message{}
 		message.RoomID = 1
 		message.Text = string(msg)
