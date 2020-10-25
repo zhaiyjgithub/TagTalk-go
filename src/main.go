@@ -22,32 +22,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	app := iris.New()
-	app.Post("/upload", func(ctx iris.Context) {
-		//_, h, _ := ctx.FormFile("test")
-		maxSize := ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
-
-		err := ctx.Request().ParseMultipartForm(maxSize)
-		if err != nil {
-			ctx.StopWithError(iris.StatusInternalServerError, err)
-			return
-		}
-
-		//multiForm := ctx.Request().MultipartForm
-		//fmt.Print(multiForm.File)
-		//h1 := ctx.Request().FormValue("my")
-		//fmt.Print(h1)
-		//ctx.SaveFormFile(h, "./text.txt")
-		_, _ = ctx.WriteString("success")
-
-		//multiForm := ctx.Request().MultipartForm
-		//file := multiForm.File
-
-		//for _, fh := range file {
-		//	ctx.SaveFormFile(fh, "./")
-		//}
-
-		_, _ = ctx.WriteString("success")
-	})
 
 	hub := chat.NewHub()
 	go hub.Run()
