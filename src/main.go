@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kataras/iris/v12"
 	"github.com/zhaiyjgithub/TagTalk-go/src/chat"
 	"log"
 	"net/http"
@@ -20,14 +21,14 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	app := iris.New()
+
 	hub := chat.NewHub()
 	go hub.Run()
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		chat.ServeWs(hub, w, r)
+	app.Any("/ws", func(ctx iris.Context) {
+		chat.ServeWs(hub, ctx.ResponseWriter(), ctx.Request())
 	})
-	err := http.ListenAndServe(":8088", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+
+	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
+
 }
