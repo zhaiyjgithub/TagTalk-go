@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/zhaiyjgithub/TagTalk-go/src/chat"
-	"log"
 	"net/http"
 )
 
