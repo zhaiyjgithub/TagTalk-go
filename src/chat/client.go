@@ -90,7 +90,7 @@ func (c *Client) writeToStream()  {
 				return
 			}
 
-			_, _ = w.Write([]byte(message.PostMessage.Text))
+			_, _ = w.Write([]byte(message.Text))
 
 			if err := w.Close(); err != nil {
 				return
