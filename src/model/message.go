@@ -21,23 +21,20 @@ type mapView struct {
 type Message struct {
 	ID string
 	RoomID int64
-	User *User
-	Mentions []*User
-	CreatedAt *time.Time
-	UpdatedAt *time.Time
-	PostMessage
-}
 
-type PostMessage struct {
-	RoomID int64
 	NickName string
 	Avatar string
-	Type MessageType
+	User *User
+	Mentions []*User
 
+	Type MessageType
 	Text string
 	ImageURL string
 	AudioURL string
 	VideoURL string
 	WebViewURL string
 	MapView mapView
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
