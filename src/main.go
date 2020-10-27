@@ -2,7 +2,11 @@ package main
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/mvc"
 	"github.com/zhaiyjgithub/TagTalk-go/src/chat"
+	"github.com/zhaiyjgithub/TagTalk-go/src/controller"
+	"github.com/zhaiyjgithub/TagTalk-go/src/service"
+	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 	"net/http"
 )
 
@@ -28,6 +32,15 @@ func main() {
 		chat.ServeWs(hub, ctx.ResponseWriter(), ctx.Request())
 	})
 
-	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
+	userParty := app.Party(utils.APIUser)
+	mvc.Configure(userParty, userMVC)
 
+	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
+}
+
+func userMVC(app *mvc.Application)  {
+	userService := service.NewUserService()
+
+	app.Register(userService)
+	app.Handle(new(controller.UserController))
 }
