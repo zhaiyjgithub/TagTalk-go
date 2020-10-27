@@ -21,7 +21,6 @@ func InstanceMysqlDB() *gorm.DB  {
 			c.User, c.Password, c.Host, c.Port, c.DBName)
 
 		mysqlEngine, err = gorm.Open(mysql.Open(driveSource), &gorm.Config{})
-
 		if err != nil {
 			panic(err)
 		}
