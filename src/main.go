@@ -35,7 +35,14 @@ func main() {
 	userParty := app.Party(utils.APIUser)
 	mvc.Configure(userParty, userMVC)
 
+	chatParty := app.Party(utils.APIChat)
+	mvc.Configure(chatParty, chatMVC)
+
 	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
+}
+
+func chatMVC(app *mvc.Application)  {
+	app.Handle(new(controller.ChatController))
 }
 
 func userMVC(app *mvc.Application)  {

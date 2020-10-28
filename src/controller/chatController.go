@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
+	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 )
 
 type ChatController struct {
-	Ctx *iris.Context
-
+	Ctx iris.Context
 }
 
 func (c *ChatController) BeforeActivation(b mvc.BeforeActivation)  {
+	b.Handle(iris.MethodPost, utils.APIChat, "UploadFile")
+}
+
+func (c *ChatController) UploadFile()  {
 	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
 	err := c.Ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
@@ -31,8 +35,4 @@ func (c *ChatController) BeforeActivation(b mvc.BeforeActivation)  {
 	}
 
 	c.Ctx.WriteString("success")
-}
-
-func (c *ChatController) UploadFile()  {
-	//f, h, err := c.c.Ctx.FormFile("file")
 }

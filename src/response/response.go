@@ -1,9 +1,9 @@
-package utils
+package response
 
 import "github.com/kataras/iris/v12"
 
 const Ok = 0
-const Err = 1
+const Error = 1
 const Expire = 2
 const NotExist = 3
 const IsExist = 4
@@ -15,17 +15,17 @@ const IsExisting = "Is existing"
 const UnknownErr = "Unknown error"
 
 func Success(ctx iris.Context, msg string, data interface{})  {
-	ctx.JSON(iris.Map{
+	_, _ = ctx.JSON(iris.Map{
 		"data": data,
 		"code": Ok,
-		"msg": msg,
+		"msg":  msg,
 	})
 }
 
 func Fail(ctx iris.Context, code int, msg string, data interface{})  {
-	ctx.JSON(iris.Map{
+	_, _ = ctx.JSON(iris.Map{
 		"code": code,
-		"msg": msg,
+		"msg":  msg,
 		"data": data,
 	})
 }

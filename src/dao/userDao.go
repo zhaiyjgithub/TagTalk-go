@@ -17,3 +17,14 @@ func (d *UserDao) AddNewUser(user *model.User) error {
 	db := d.engine.Create(user)
 	return db.Error
 }
+
+func (d *UserDao) IsUserRegister(email string) bool {
+	var u model.User
+	db := d.engine.Where("email = ?", email).Find(&u)
+
+	if db.Error != nil {
+		return true
+	}
+
+	return u.ID > 0
+}

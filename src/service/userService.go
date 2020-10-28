@@ -8,6 +8,7 @@ import (
 
 type UserService interface {
 	AddNewUser(user *model.User) error
+	IsUserRegister(email string) bool
 }
 
 func NewUserService() UserService {
@@ -20,4 +21,8 @@ type userService struct {
 
 func (s *userService) AddNewUser(user *model.User) error {
 	return s.dao.AddNewUser(user)
+}
+
+func (s *userService) IsUserRegister(email string) bool  {
+	return s.dao.IsUserRegister(email)
 }
