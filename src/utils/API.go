@@ -5,6 +5,7 @@ const (
 	RegisterNewDoctor = "/RegisterNewDoctor"
 	RequestVerificationCode = "/RequestVerificationCode"
 	Login = "/Login"
+	GetUserInfo = "/GetUserInfo"
 )
 
 const (

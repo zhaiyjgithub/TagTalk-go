@@ -30,6 +30,7 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.RegisterNewDoctor,"RegisterNewDoctor")
 	b.Handle(iris.MethodPost, utils.RequestVerificationCode,"RequestVerificationCode")
 	b.Handle(iris.MethodPost, utils.Login, "Login")
+	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo", utils.Jwt.Verify)
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -102,6 +103,10 @@ func (c *UserController) Login()  {
 		info.Token = token
 		response.Success(c.Ctx, response.Successful, info)
 	}
+}
+
+func (c *UserController) GetUserInfo()  {
+	response.Success(c.Ctx, response.Successful, nil)
 }
 
 func (c *UserController) RequestVerificationCode()  {
