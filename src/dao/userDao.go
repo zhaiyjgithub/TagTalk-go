@@ -28,3 +28,14 @@ func (d *UserDao) IsUserRegister(email string) bool {
 
 	return u.ID > 0
 }
+
+func (d *UserDao) GetUserByEmail(email string) *model.User {
+	var u model.User
+	db := d.engine.Where("email = ? ", email).Find(&u)
+	if db.Error != nil  || u.ID == 0{
+		return nil
+	}
+
+	return &u
+
+}

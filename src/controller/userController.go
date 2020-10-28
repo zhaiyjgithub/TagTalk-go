@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/zhaiyjgithub/TagTalk-go/src/database"
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
@@ -28,6 +29,7 @@ type UserController struct {
 func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.RegisterNewDoctor,"RegisterNewDoctor")
 	b.Handle(iris.MethodPost, utils.RequestVerificationCode,"RequestVerificationCode")
+	b.Handle(iris.MethodPost, utils.Login, "Login")
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -68,6 +70,37 @@ func (c *UserController) RegisterNewDoctor()  {
 		}else {
 			response.Success(c.Ctx, response.Successful, nil)
 		}
+	}
+}
+
+func (c *UserController) Login()  {
+	type Param struct {
+		Email string `validate:"email"`
+		Password string `validate:"min=6,max=20"`
+	}
+
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	user := c.UserService.GetUserByEmail(p.Email)
+	if user == nil {
+		response.Fail(c.Ctx, response.Error, "", nil)
+	}else {
+		type UserInfo struct {
+			*model.User
+			Token string
+		}
+
+		var claims jwt.Claims
+		token, _ := utils.Jwt.Token(claims)
+
+		var info UserInfo
+		info.User = user
+		info.Token = token
+		response.Success(c.Ctx, response.Successful, info)
 	}
 }
 
