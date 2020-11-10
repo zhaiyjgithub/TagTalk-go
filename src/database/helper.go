@@ -36,8 +36,8 @@ func InstanceMysqlDB() *gorm.DB  {
 func InstanceRedisDB() *redis.Client {
 	redisDBOnce.Do(func() {
 		c := conf.RedisConf
-		addr := fmt.Sprintf("%s/%s", c.Host, c.Port)
-
+		addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
+		fmt.Printf("Connect to redis: %s", addr)
 		redisEngine = redis.NewClient(&redis.Options{
 			Addr: addr,
 			Password: "",

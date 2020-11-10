@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	VerificationCodeTimeout time.Duration = 0
+	PinCacheTimeout = 60*time.Second
 )
 
 var contextBg = context.Background()
@@ -38,7 +38,6 @@ func (c *UserController) RegisterNewDoctor()  {
 		Name string `validate:"gt=0"`
 		Email string `validate:"email"`
 		Password string `validate:"min=6,max=20"`
-		Gender model.GenderType
 		Pin string `validate:"len=6"`
 	}
 
@@ -62,14 +61,23 @@ func (c *UserController) RegisterNewDoctor()  {
 			Email: p.Email,
 			Password: p.Password,
 			Name: p.Name,
-			Gender: p.Gender,
 		}
 
 		err = c.UserService.AddNewUser(user)
 		if err != nil {
 			response.Fail(c.Ctx, response.Error, err.Error(), nil)
 		}else {
-			response.Success(c.Ctx, response.Successful, nil)
+			type UserInfo struct {
+				*model.User
+				Token string
+			}
+
+			token, _ := generateToken()
+
+			var info UserInfo
+			info.User = user
+			info.Token = token
+			response.Success(c.Ctx, response.Successful, &info)
 		}
 	}
 }
@@ -95,13 +103,12 @@ func (c *UserController) Login()  {
 			Token string
 		}
 
-		var claims jwt.Claims
-		token, _ := utils.Jwt.Token(claims)
+		token, _ := generateToken()
 
 		var info UserInfo
 		info.User = user
 		info.Token = token
-		response.Success(c.Ctx, response.Successful, info)
+		response.Success(c.Ctx, response.Successful, &info)
 	}
 }
 
@@ -139,6 +146,17 @@ func (c *UserController) SendSignUpPin()  {
 	fmt.Printf("your pin: %s \r\n", pin)
 }
 
+func generateToken() (string, error) {
+	var claims jwt.Claims
+	token, err := utils.Jwt.Token(claims)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func generateSignUpPin() string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	pin := fmt.Sprintf("%06v", rnd.Int31n(1000000))
@@ -147,7 +165,7 @@ func generateSignUpPin() string {
 
 func addSignUpPinToCache(key string, val string) error {
 	rdb := database.InstanceRedisDB()
-	return rdb.Set(contextBg, key, val, VerificationCodeTimeout).Err()
+	return rdb.Set(contextBg, key, val, PinCacheTimeout).Err()
 }
 
 func getSignUpPinFromCache(key string) (string, error) {

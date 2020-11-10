@@ -12,7 +12,7 @@ var MySQLConf = DBConf{
 	Host: "127.0.0.1",
 	Port: 3306,
 	User: "root",
-	Password: "12345678",
+	Password: "123456",
 	DBName: "tagtalk",
 }
 

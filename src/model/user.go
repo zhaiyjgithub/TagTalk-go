@@ -10,7 +10,7 @@ const (
 )
 
 type User struct {
-	ID         int    `gorm:"column:id;primary_key" json:"UserID"`
+	ID         int    `gorm:"column:id;primary_key" json:"-"`
 	Name       string `gorm:"column:name"`
 	Email      string `gorm:"column:email"`
 	Phone      string `gorm:"column:phone"`
