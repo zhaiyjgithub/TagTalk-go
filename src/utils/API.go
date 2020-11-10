@@ -3,7 +3,7 @@ package utils
 const (
 	APIUser = "/User"
 	RegisterNewDoctor = "/RegisterNewDoctor"
-	RequestVerificationCode = "/RequestVerificationCode"
+	SendSignUpPin = "/SendSignUpPin"
 )
 
 const (

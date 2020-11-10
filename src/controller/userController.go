@@ -27,7 +27,7 @@ type UserController struct {
 
 func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.RegisterNewDoctor,"RegisterNewDoctor")
-	b.Handle(iris.MethodPost, utils.RequestVerificationCode,"RequestVerificationCode")
+	b.Handle(iris.MethodPost, utils.SendSignUpPin,"SendSignUpPin")
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -36,7 +36,7 @@ func (c *UserController) RegisterNewDoctor()  {
 		Email string `validate:"email"`
 		Password string `validate:"min=6,max=20"`
 		Gender model.GenderType
-		Code string `validate:"len=6"`
+		Pin string `validate:"len=6"`
 	}
 
 	var p param
@@ -51,8 +51,8 @@ func (c *UserController) RegisterNewDoctor()  {
 		return
 	}
 
-	code , err := getVerificationCodeToRedis(p.Email)
-	if err != nil || code != p.Code {
+	pin , err := getSignUpPinFromCache(p.Email)
+	if err != nil || pin != p.Pin {
 		response.Fail(c.Ctx, response.Error, "Verification code is invalid", nil)
 	}else {
 		user := &model.User{
@@ -71,7 +71,7 @@ func (c *UserController) RegisterNewDoctor()  {
 	}
 }
 
-func (c *UserController) RequestVerificationCode()  {
+func (c *UserController) SendSignUpPin()  {
 	type Param struct {
 		Email string `validate:"email"`
 	}
@@ -88,29 +88,31 @@ func (c *UserController) RequestVerificationCode()  {
 		return
 	}
 
-	code := generateVerificationCode()
-	err = addVerificationCodeToRedis(p.Email, code)
+	pin := generateSignUpPin()
+	err = addSignUpPinToCache(p.Email, pin)
+	
+	err = utils.SendPinEmail(p.Email, pin)
 	if err != nil {
 		response.Fail(c.Ctx, response.Error, "", nil)
 	}else {
 		response.Success(c.Ctx, response.Successful, nil)
 	}
 
-	fmt.Printf("your code: %s \r\n", code)
+	fmt.Printf("your pin: %s \r\n", pin)
 }
 
-func generateVerificationCode() string {
+func generateSignUpPin() string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	code := fmt.Sprintf("%06v", rnd.Int31n(1000000))
-	return code
+	pin := fmt.Sprintf("%06v", rnd.Int31n(1000000))
+	return pin
 }
 
-func addVerificationCodeToRedis(key string, val string) error {
+func addSignUpPinToCache(key string, val string) error {
 	rdb := database.InstanceRedisDB()
 	return rdb.Set(contextBg, key, val, VerificationCodeTimeout).Err()
 }
 
-func getVerificationCodeToRedis(key string) (string, error) {
+func getSignUpPinFromCache(key string) (string, error) {
 	rdb := database.InstanceRedisDB()
 	val, err := rdb.Get(contextBg, key).Result()
 	return val, err
