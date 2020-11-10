@@ -7,9 +7,12 @@ import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/conf"
 	"github.com/zhaiyjgithub/TagTalk-go/src/response"
 	"gopkg.in/gomail.v2"
+	"github.com/kataras/iris/v12/middleware/jwt"
+	"time"
 )
 
 var defaultValidator = validator.New()
+var Jwt, _ = jwt.New(15*time.Minute, jwt.HS256, []byte("hello"))
 
 func ValidateParam(ctx iris.Context, param interface{}) error {
 	err := ctx.ReadJSON(param)

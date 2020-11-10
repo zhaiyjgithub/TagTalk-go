@@ -9,6 +9,7 @@ import (
 type UserService interface {
 	AddNewUser(user *model.User) error
 	IsUserRegister(email string) bool
+	GetUserByEmail(email string) *model.User
 }
 
 func NewUserService() UserService {
@@ -25,4 +26,8 @@ func (s *userService) AddNewUser(user *model.User) error {
 
 func (s *userService) IsUserRegister(email string) bool  {
 	return s.dao.IsUserRegister(email)
+}
+
+func (s *userService) GetUserByEmail(email string) *model.User  {
+	return s.dao.GetUserByEmail(email)
 }

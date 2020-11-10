@@ -4,6 +4,8 @@ const (
 	APIUser = "/User"
 	RegisterNewDoctor = "/RegisterNewDoctor"
 	SendSignUpPin = "/SendSignUpPin"
+	Login = "/Login"
+	GetUserInfo = "/GetUserInfo"
 )
 
 const (
