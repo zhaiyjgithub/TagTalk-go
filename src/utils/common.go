@@ -43,3 +43,4 @@ func SendPinEmail(email string, pin string) error {
 
 	return d.DialAndSend(m)
 }
+

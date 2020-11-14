@@ -19,6 +19,7 @@ type User struct {
 	Level      int  `gorm:"column:level"`
 	Password   string `grom:"column:password"`
 	Gender     GenderType `gorm:"column:gender"`
+	ChatID     int64 `gorm:"column:chat_id"`
 	CreatedAt  time.Time      `gorm:"column:created_at" json:"-"`
 	UpdatedAt  time.Time      `gorm:"column:updated_at" json:"-"`
 }

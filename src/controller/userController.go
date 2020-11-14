@@ -57,10 +57,17 @@ func (c *UserController) RegisterNewDoctor()  {
 	if err != nil || pin != p.Pin {
 		response.Fail(c.Ctx, response.Error, "Verification code is invalid", nil)
 	}else {
+		node, err := utils.NewWorker(1)
+		if err != nil {
+			response.Fail(c.Ctx, response.Error, err.Error(), nil)
+			return
+		}
+
 		user := &model.User{
 			Email: p.Email,
 			Password: p.Password,
 			Name: p.Name,
+			ChatID: node.GetId(), //通过雪花算法生成唯一ID，作为Chat ID
 		}
 
 		err = c.UserService.AddNewUser(user)
@@ -133,7 +140,7 @@ func (c *UserController) SendSignUpPin()  {
 		response.Success(c.Ctx, response.Successful, nil)
 	}
 
-	fmt.Printf("your pin: %s \r\n", pin)
+	fmt.Printf("\r\n your pin: %s \r\n", pin)
 }
 
 func generateToken() (string, error) {
