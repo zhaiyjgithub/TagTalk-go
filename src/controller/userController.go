@@ -67,17 +67,7 @@ func (c *UserController) RegisterNewDoctor()  {
 		if err != nil {
 			response.Fail(c.Ctx, response.Error, err.Error(), nil)
 		}else {
-			type UserInfo struct {
-				*model.User
-				Token string
-			}
-
-			token, _ := generateToken()
-
-			var info UserInfo
-			info.User = user
-			info.Token = token
-			response.Success(c.Ctx, response.Successful, &info)
+			response.Success(c.Ctx, response.Successful, nil)
 		}
 	}
 }

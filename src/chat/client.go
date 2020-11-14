@@ -2,6 +2,7 @@ package chat
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"log"
@@ -123,6 +124,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
+	fmt.Printf("Login uid: %s \n", uid)
 	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: uid}
 	client.hub.register <- client
 
