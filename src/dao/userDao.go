@@ -37,5 +37,11 @@ func (d *UserDao) GetUserByEmail(email string) *model.User {
 	}
 
 	return &u
+}
 
+func (d *UserDao) GetNearByUsers(chatId int64) []*model.User {
+	var list []*model.User
+	_ = d.engine.Where("email != ?", chatId).Limit(10).Find(&list)
+
+	return list
 }
