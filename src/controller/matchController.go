@@ -3,10 +3,12 @@ package controller
 import (
 	"fmt"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/mvc"
 	"github.com/zhaiyjgithub/TagTalk-go/src/database"
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"github.com/zhaiyjgithub/TagTalk-go/src/response"
 	"github.com/zhaiyjgithub/TagTalk-go/src/service"
+	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 )
 
 type MatchViewController struct {
@@ -21,12 +23,21 @@ const (
 	Star LikeType = 2
 )
 
+func (c *MatchViewController) BeforeActivation(b mvc.BeforeActivation)  {
+	b.Handle(iris.MethodPost, utils.GetMatchList,"GetMatchList")
+	b.Handle(iris.MethodPost, utils.AddLikeOrDisLike, "AddLikeOrDisLike")
+}
+
 func (c *MatchViewController)GetMatchList()  {
 	type Param struct {
 		ChatId int64
 	}
 
 	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
 
 	type MatchViewModel struct {
 		User *model.User
@@ -59,21 +70,25 @@ func (c *MatchViewController)GetMatchList()  {
 	response.Success(c.Ctx, response.Successful, &vModels)
 }
 
-func (c *MatchViewController) AddLike()  {
+func (c *MatchViewController) AddLikeOrDisLike()  {
 	type Param struct {
 		ChatId int64
 		PeerChatId int64
-		likeType LikeType
+		Type LikeType
 	}
 
 	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
 
 	key := ""
-	if p.likeType == Like {
+	if p.Type == Like {
 		key = fmt.Sprintf("like_%d", p.ChatId)
-	}else if p.likeType == DisLike {
+	}else if p.Type == DisLike {
 		key = fmt.Sprintf("dislike_%d", p.ChatId)
-	}else if p.likeType == Star {
+	}else if p.Type == Star {
 		likeKey := fmt.Sprintf("like_%d", p.ChatId)
 		addLikesOrDisLikes(likeKey, fmt.Sprintf("%d", p.PeerChatId))
 
@@ -92,6 +107,7 @@ func getLikesOrDisLikes(key string) []string{
 
 func addLikesOrDisLikes(key string, item string) {
 	rd := database.InstanceRedisDB()
-	rd.SAdd(contextBg, key, item)
+	code, err := rd.SAdd(contextBg, key, item).Result()
+	fmt.Printf("code: %d -- err: %v", code, err)
 }
 

@@ -38,6 +38,9 @@ func main() {
 	chatParty := app.Party(utils.APIChat)
 	mvc.Configure(chatParty, chatMVC)
 
+	matchParty := app.Party(utils.APIMatch)
+	mvc.Configure(matchParty, matchMVC)
+
 	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
 }
 
@@ -50,4 +53,11 @@ func userMVC(app *mvc.Application)  {
 
 	app.Register(userService)
 	app.Handle(new(controller.UserController))
+}
+
+func matchMVC(app *mvc.Application) {
+	userService := service.NewUserService()
+
+	app.Register(userService)
+	app.Handle(new(controller.MatchViewController))
 }

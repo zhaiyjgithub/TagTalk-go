@@ -12,3 +12,9 @@ const (
 	APIChat = "/Chat"
 	UploadFile = "/UploadFile"
 )
+
+const (
+	APIMatch = "/Match"
+	GetMatchList = "/GetMatchList"
+	AddLikeOrDisLike = "/AddLikeOrDisLike"
+)
