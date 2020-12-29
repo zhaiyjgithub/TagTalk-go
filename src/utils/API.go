@@ -15,6 +15,6 @@ const (
 
 const (
 	APIMatch = "/Match"
-	GetMatchList = "/GetMatchList"
+	GetNearByPeople = "/GetNearByPeople"
 	AddLikeOrDisLike = "/AddLikeOrDisLike"
 )
