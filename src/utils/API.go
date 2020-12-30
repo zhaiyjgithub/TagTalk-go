@@ -18,3 +18,9 @@ const (
 	GetNearByPeople = "/GetNearByPeople"
 	AddLikeOrDisLike = "/AddLikeOrDisLike"
 )
+
+const (
+	APIContacts = "/Contacts"
+	GetContactsByChatID = "/GetContactsByChatID"
+	AddNewFriend = "/AddNewFriend"
+)

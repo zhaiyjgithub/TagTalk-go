@@ -41,6 +41,9 @@ func main() {
 	matchParty := app.Party(utils.APIMatch)
 	mvc.Configure(matchParty, matchMVC)
 
+	contactParty := app.Party(utils.APIContacts)
+	mvc.Configure(contactParty, contactsMVC)
+
 	_ = app.Run(iris.Addr(":8090"), iris.WithPostMaxMemory(32<<20)) //max = 32M
 }
 
@@ -60,4 +63,10 @@ func matchMVC(app *mvc.Application) {
 
 	app.Register(userService)
 	app.Handle(new(controller.MatchViewController))
+}
+
+func contactsMVC(app *mvc.Application)  {
+	contactService := service.NewContactsService()
+	app.Register(contactService)
+	app.Handle(new(controller.ContactsController))
 }
