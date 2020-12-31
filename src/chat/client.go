@@ -1,12 +1,13 @@
 package chat
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -15,7 +16,7 @@ type Client struct {
 	hub *Hub
 	conn *websocket.Conn
 	send chan *model.Message
-	uid string
+	uid int64
 }
 
 const (
@@ -61,10 +62,25 @@ func (c *Client) readFromStream()  {
 		}
 
 		//将全部换行符替换成空格，最后去除
-		msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
+		//这里会将客户端传递上来的message string 转成 message model
+		type Msg struct {
+			SenderID int64
+			ChannelType model.ChannelType
+			ChannelID int64
+			MessageType model.MessageType
+			Message string
+		}
+		m := &Msg{}
+		err = json.Unmarshal(msg, &m)
+		//msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
 		message := &model.Message{}
-		message.RoomID = 1
-		message.Text = string(msg)
+
+		message.ChannelType= m.ChannelType
+		message.ChannelID = m.ChannelID
+
+		message.MessageType = m.MessageType
+		message.Message = m.Message
+
 		c.hub.broadcast <- message
 	}
 }
@@ -91,7 +107,11 @@ func (c *Client) writeToStream()  {
 				return
 			}
 
-			_, _ = w.Write([]byte(message.Text))
+			msg, err := json.Marshal(message)
+			if err != nil {
+				fmt.Printf("marshal message error: %s", err.Error())
+			}
+			_, _ = w.Write([]byte(msg))
 
 			if err := w.Close(); err != nil {
 				return
@@ -125,7 +145,8 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request)  {
 	}
 
 	fmt.Printf("Login uid: %s \n", uid)
-	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: uid}
+	id, err := strconv.Atoi(uid)
+	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: int64(id)}
 	client.hub.register <- client
 
 	go client.readFromStream()

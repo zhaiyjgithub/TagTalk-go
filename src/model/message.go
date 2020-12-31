@@ -3,6 +3,7 @@ package model
 import "time"
 
 type MessageType int
+type ChannelType int
 
 const (
 	Text MessageType = 0
@@ -13,6 +14,12 @@ const (
 	MapView MessageType = 5
 )
 
+const (
+	Single ChannelType = 1
+	Group ChannelType = 2
+	Broadcast ChannelType = 3
+)
+
 type mapView struct {
 	lat float64
 	lng float64
@@ -20,20 +27,17 @@ type mapView struct {
 
 type Message struct {
 	ID string
-	RoomID int64
 
 	NickName string
 	Avatar string
 	User *User
 	Mentions []*User
 
-	Type MessageType
-	Text string
-	ImageURL string
-	AudioURL string
-	VideoURL string
-	WebViewURL string
-	MapView mapView
+	ChannelType ChannelType
+	ChannelID int64
+
+	MessageType MessageType
+	Message string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -41,7 +41,7 @@ func (c *ContactsController) AddNewFriend()  {
 	}
 }
 
-func (c *ContactsController) GetContacts()  {
+func (c *ContactsController) GetContactsByChatID()  {
 	type Param struct {
 		ChatID int64
 	}
