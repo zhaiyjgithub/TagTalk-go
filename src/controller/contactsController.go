@@ -22,8 +22,8 @@ func (c *ContactsController) BeforeActivation(b mvc.BeforeActivation)  {
 
 func (c *ContactsController) AddNewFriend()  {
 	type Param struct {
-		ChatID int64
-		FriendID int64
+		ChatID string
+		FriendID string
 	}
 
 	var p Param
@@ -43,7 +43,7 @@ func (c *ContactsController) AddNewFriend()  {
 
 func (c *ContactsController) GetContactsByChatID()  {
 	type Param struct {
-		ChatID int64
+		ChatID string
 	}
 
 	var p Param

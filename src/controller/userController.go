@@ -67,7 +67,7 @@ func (c *UserController) RegisterNewDoctor()  {
 			Email: p.Email,
 			Password: p.Password,
 			Name: p.Name,
-			ChatID: node.GetId(), //通过雪花算法生成唯一ID，作为Chat ID
+			ChatID: string(node.GetId()), //通过雪花算法生成唯一ID，作为Chat ID
 		}
 
 		err = c.UserService.AddNewUser(user)

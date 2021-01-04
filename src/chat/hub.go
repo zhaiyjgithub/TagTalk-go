@@ -6,7 +6,7 @@ import (
 )
 
 type Hub struct {
-	clients map[int64]*Client
+	clients map[string]*Client
 	broadcast chan *model.Message
 	register chan *Client
 	unregister chan *Client
@@ -14,7 +14,7 @@ type Hub struct {
 
 func NewHub() *Hub {
 	return &Hub{
-		clients: make(map[int64]*Client),
+		clients: make(map[string]*Client),
 		broadcast: make(chan *model.Message),
 		register: make(chan *Client),
 		unregister: make(chan *Client),
@@ -60,7 +60,7 @@ func handleMultiClientMessage(hubClients map[int64]*Client, uid int64)  {
 	//}
 }
 
-func getSingleClient(hubClients map[int64]*Client, uid int64) *Client  {
+func getSingleClient(hubClients map[string]*Client, uid string) *Client  {
 	return hubClients[uid]
 }
 

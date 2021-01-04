@@ -7,7 +7,6 @@ import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -16,7 +15,7 @@ type Client struct {
 	hub *Hub
 	conn *websocket.Conn
 	send chan *model.Message
-	uid int64
+	uid string
 }
 
 const (
@@ -64,9 +63,9 @@ func (c *Client) readFromStream()  {
 		//将全部换行符替换成空格，最后去除
 		//这里会将客户端传递上来的message string 转成 message model
 		type Msg struct {
-			SenderID int64
+			SenderID string
 			ChannelType model.ChannelType
-			ChannelID int64
+			ChannelID string
 			MessageType model.MessageType
 			Message string
 		}
@@ -136,17 +135,16 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request)  {
 
 	param := r.URL.Query()
 
-	uid := ""
-	if param["uid"] != nil && len(param["uid"]) > 0 {
-		uid = param["uid"][0]
+	chatID := ""
+	if param["chatID"] != nil && len(param["chatID"]) > 0 {
+		chatID = param["chatID"][0]
 	}else {
 		log.Println("uid is need.")
 		return
 	}
 
-	fmt.Printf("Login uid: %s \n", uid)
-	id, err := strconv.Atoi(uid)
-	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: int64(id)}
+	fmt.Printf("Login chatID: %s \n", chatID)
+	client := &Client{hub: hub, conn: conn, send:make(chan *model.Message, 512), uid: chatID}
 	client.hub.register <- client
 
 	go client.readFromStream()

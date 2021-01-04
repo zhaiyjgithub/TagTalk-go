@@ -10,7 +10,7 @@ type UserService interface {
 	AddNewUser(user *model.User) error
 	IsUserRegister(email string) bool
 	GetUserByEmail(email string) *model.User
-	GetNearByUsers(chatId int64) []*model.User
+	GetNearByUsers(chatId string) []*model.User
 }
 
 func NewUserService() UserService {
@@ -33,6 +33,6 @@ func (s *userService) GetUserByEmail(email string) *model.User  {
 	return s.dao.GetUserByEmail(email)
 }
 
-func (s *userService) GetNearByUsers(chatId int64) []*model.User {
+func (s *userService) GetNearByUsers(chatId string) []*model.User {
 	return s.dao.GetNearByUsers(chatId)
 }

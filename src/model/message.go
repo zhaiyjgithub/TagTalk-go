@@ -34,7 +34,7 @@ type Message struct {
 	Mentions []*User
 
 	ChannelType ChannelType
-	ChannelID int64
+	ChannelID string
 
 	MessageType MessageType
 	Message string

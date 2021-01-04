@@ -13,11 +13,20 @@ func NewContactsDao(engine *gorm.DB) *ContactsDao {
 	return &ContactsDao{engine: engine}
 }
 
-func (d *ContactsDao) GetContactsByChatID(chatId int64) []*model.Contact {
-	var list []*model.Contact
-	d.engine.Where("chat_id = ?", chatId).Find(&list)
+func (d *ContactsDao) GetContactsByChatID(chatId string) []*model.User {
+	var contacts []*model.Contact
+	d.engine.Raw("SELECT chat_id, friend_id FROM contacts WHERE chat_id = ? UNION " +
+		"SELECT chat_id, friend_id FROM contacts WHERE friend_id = ?", chatId, chatId).Scan(&contacts)
 
-	return list
+	var friendIds []string
+	for _, contact := range contacts {
+		friendIds = append(friendIds, contact.FriendID)
+	}
+
+	var friends []*model.User
+	d.engine.Raw("SELECT * FROM users WHERE chat_id IN (?)", friendIds).Scan(&friends)
+
+	return friends
 }
 
 func (d *ContactsDao) AddNewFriend(contact *model.Contact) error {

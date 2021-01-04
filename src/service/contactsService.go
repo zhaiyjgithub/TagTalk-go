@@ -7,7 +7,7 @@ import (
 )
 
 type ContactsService interface {
-	GetContactsByChatID(chatId int64) []*model.Contact
+	GetContactsByChatID(chatId string) []*model.User
 	AddNewFriend(contact *model.Contact) error
 }
 
@@ -19,10 +19,10 @@ func NewContactsService() ContactsService  {
 	return &contactsService{dao: dao.NewContactsDao(database.InstanceMysqlDB())}
 }
 
-func (s *contactsService) GetContactsByChatID(chatId int64) []*model.Contact {
+func (s *contactsService) GetContactsByChatID(chatId string) []*model.User {
 	return s.dao.GetContactsByChatID(chatId)
 }
 
 func (s *contactsService) AddNewFriend(contact *model.Contact) error  {
-	return s.AddNewFriend(contact)
+	return s.dao.AddNewFriend(contact)
 }

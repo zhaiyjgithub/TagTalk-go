@@ -30,7 +30,7 @@ func (c *MatchViewController) BeforeActivation(b mvc.BeforeActivation)  {
 
 func (c *MatchViewController)GetNearByPeople()  {
 	type Param struct {
-		ChatId int64
+		ChatId string
 	}
 
 	var p Param
