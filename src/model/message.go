@@ -26,19 +26,19 @@ type mapView struct {
 }
 
 type Message struct {
-	ID string
+	ID string `json:"id"`
 
-	NickName string
-	Avatar string
-	SenderId string
-	Mentions []string
+	NickName string `json:"nickName"`
+	Avatar string	`json:"avatar"`
+	SenderId string	`json:"senderId"`
+	Mentions []string `json:"mentions"`
 
-	ChannelType ChannelType
-	ChannelID string
+	ChannelType ChannelType 	`json:"channelType"`
+	ChannelID string `json:"channelId"`
 
-	MessageType MessageType
-	Message string
+	MessageType MessageType `json:"messageType"`
+	Message string `json:"message"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }

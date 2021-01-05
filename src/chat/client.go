@@ -98,7 +98,7 @@ func (c *Client) writeToStream()  {
 			if err != nil {
 				fmt.Printf("marshal message error: %s", err.Error())
 			}
-			_, _ = w.Write([]byte(msg))
+			_, _ = w.Write(msg)
 
 			if err := w.Close(); err != nil {
 				return
