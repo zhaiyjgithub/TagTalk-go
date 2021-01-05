@@ -30,8 +30,8 @@ type Message struct {
 
 	NickName string
 	Avatar string
-	User *User
-	Mentions []*User
+	SenderId string
+	Mentions []string
 
 	ChannelType ChannelType
 	ChannelID string

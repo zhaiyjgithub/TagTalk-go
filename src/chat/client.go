@@ -62,25 +62,13 @@ func (c *Client) readFromStream()  {
 
 		//将全部换行符替换成空格，最后去除
 		//这里会将客户端传递上来的message string 转成 message model
-		type Msg struct {
-			SenderID string
-			ChannelType model.ChannelType
-			ChannelID string
-			MessageType model.MessageType
-			Message string
-		}
-		m := &Msg{}
+		m := &model.Message{}
 		err = json.Unmarshal(msg, &m)
-		//msg = bytes.TrimSpace(bytes.Replace(msg, newline, space, -1))
-		message := &model.Message{}
+		if err != nil {
+			return
+		}
 
-		message.ChannelType= m.ChannelType
-		message.ChannelID = m.ChannelID
-
-		message.MessageType = m.MessageType
-		message.Message = m.Message
-
-		c.hub.broadcast <- message
+		c.hub.broadcast <- m
 	}
 }
 
