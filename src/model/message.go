@@ -4,7 +4,9 @@ import "time"
 
 type MessageType int
 type ChannelType int
+type MessageCategory int
 
+//MessageMediaType
 const (
 	Text MessageType = 0
 	Image MessageType = 1
@@ -12,6 +14,11 @@ const (
 	Video MessageType = 3
 	WebView MessageType = 4
 	MapView MessageType = 5
+)
+
+const (
+	Normal MessageCategory = 0
+	NewDialog MessageCategory = 1
 )
 
 const (
