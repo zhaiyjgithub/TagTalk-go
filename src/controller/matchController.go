@@ -25,7 +25,7 @@ const (
 
 func (c *MatchViewController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.GetNearByPeople,"GetNearByPeople")
-	b.Handle(iris.MethodPost, utils.AddLikeOrDisLike, "AddLikeOrDisLike")
+	b.Handle(iris.MethodPost, utils.AddLikeStatus, "AddLikeStatus")
 }
 
 func (c *MatchViewController)GetNearByPeople()  {
@@ -52,13 +52,13 @@ func (c *MatchViewController)GetNearByPeople()  {
 
 	var vModels []*MatchViewModel
 	for _, user := range users{
-		likesKey:= fmt.Sprintf("like_%d", user.ChatID)
-		disLikesKey := fmt.Sprintf("dislike_%d", user.ChatID)
-		starLikesKey := fmt.Sprintf("starLike_%d", user.ChatID)
+		likesKey:= getRedisKey(Like, user.ChatID)
+		disLikesKey := getRedisKey(DisLike, user.ChatID)
+		starLikesKey := getRedisKey(Star, user.ChatID)
 
-		likes := getChatIDListByKey(likesKey)
-		disLikes := getChatIDListByKey(disLikesKey)
-		starLikes := getChatIDListByKey(starLikesKey)
+		likes := getChatIDListFromRedisByKey(likesKey)
+		disLikes := getChatIDListFromRedisByKey(disLikesKey)
+		starLikes := getChatIDListFromRedisByKey(starLikesKey)
 
 		vModel := &MatchViewModel{
 			User: user,
@@ -73,10 +73,10 @@ func (c *MatchViewController)GetNearByPeople()  {
 	response.Success(c.Ctx, response.Successful, &vModels)
 }
 
-func (c *MatchViewController) AddLikeOrDisLike()  {
+func (c *MatchViewController) AddLikeStatus()  {
 	type Param struct {
-		ChatId int64
-		PeerChatId int64
+		ChatId string
+		PeerChatId string
 		Type LikeType
 	}
 
@@ -86,29 +86,41 @@ func (c *MatchViewController) AddLikeOrDisLike()  {
 		return
 	}
 
-	key := ""
-	if p.Type == Like {
-		key = fmt.Sprintf("like_%d", p.ChatId)
-	}else if p.Type == DisLike {
-		key = fmt.Sprintf("dislike_%d", p.ChatId)
-	}else if p.Type == Star {
-		likeKey := fmt.Sprintf("like_%d", p.ChatId)
-		addChatIDToCache(likeKey, fmt.Sprintf("%d", p.PeerChatId))
-
-		key = fmt.Sprintf("starLike_%d", p.ChatId)
+	key := getRedisKey(p.Type, p.ChatId)
+	 if p.Type == Star {
+		likeKey := getRedisKey(Like, p.ChatId)
+		addChatIDToRedis(likeKey, p.PeerChatId)
 	}
-	addChatIDToCache(key, fmt.Sprintf("%d", p.PeerChatId))
+	addChatIDToRedis(key, p.PeerChatId)
 
 	response.Success(c.Ctx, response.Successful, nil)
 }
 
-func getChatIDListByKey(key string) []string{
+func getRedisKey(likeType LikeType, chatId string) string {
+	key := ""
+	switch likeType {
+	case Like:
+		key = fmt.Sprintf("like_%s", chatId)
+		break
+	case DisLike:
+		key = fmt.Sprintf("disLike_%s", chatId)
+		break
+	case Star:
+		key = fmt.Sprintf("starLike_%s", chatId)
+		break
+	default:
+	}
+	
+	return key
+}
+
+func getChatIDListFromRedisByKey(key string) []string{
 	rd := database.InstanceRedisDB()
 	items, _ := rd.SMembers(contextBg, key).Result()
 	return items
 }
 
-func addChatIDToCache(key string, item string) {
+func addChatIDToRedis(key string, item string) {
 	rd := database.InstanceRedisDB()
 	code, err := rd.SAdd(contextBg, key, item).Result()
 	fmt.Printf("code: %d -- err: %v", code, err)
