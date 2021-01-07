@@ -2,18 +2,17 @@ package model
 
 import "time"
 
-type MessageType int
+type MessageMediaType int
 type ChannelType int
 type MessageCategory int
 
-//MessageMediaType
 const (
-	Text MessageType = 0
-	Image MessageType = 1
-	Audio MessageType = 2
-	Video MessageType = 3
-	WebView MessageType = 4
-	MapView MessageType = 5
+	Text MessageMediaType = 0
+	Image MessageMediaType = 1
+	Audio MessageMediaType = 2
+	Video MessageMediaType = 3
+	WebView MessageMediaType = 4
+	MapView MessageMediaType = 5
 )
 
 const (
@@ -42,8 +41,9 @@ type Message struct {
 
 	ChannelType ChannelType 	`json:"channelType"`
 	ChannelID string `json:"channelId"`
-
-	MessageType MessageType `json:"messageType"`
+	
+	Category MessageCategory `json:"category"`
+	MediaType MessageMediaType `json:"mediaType"`
 	Message string `json:"message"`
 
 	CreatedAt time.Time `json:"createdAt"`
