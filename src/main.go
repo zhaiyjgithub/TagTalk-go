@@ -67,6 +67,8 @@ func matchMVC(app *mvc.Application) {
 
 func contactsMVC(app *mvc.Application)  {
 	contactService := service.NewContactsService()
-	app.Register(contactService)
+	userService := service.NewUserService()
+
+	app.Register(contactService, userService)
 	app.Handle(new(controller.ContactsController))
 }

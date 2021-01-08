@@ -45,3 +45,9 @@ func (d *UserDao) GetNearByUsers(chatId string) []*model.User {
 
 	return list
 }
+
+func (d *UserDao) GetUserByChatID(chatId string) *model.User  {
+	var u *model.User
+	_ = d.engine.Where("chat_id = ?", chatId).Limit(1).Find(&u)
+	return u
+}
