@@ -6,6 +6,7 @@ import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"sync"
 )
 
@@ -24,7 +25,9 @@ func InstanceMysqlDB() *gorm.DB  {
 		driveSource := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 			c.User, c.Password, c.Host, c.Port, c.DBName)
 
-		mysqlEngine, err = gorm.Open(mysql.Open(driveSource), &gorm.Config{})
+		mysqlEngine, err = gorm.Open(mysql.Open(driveSource), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
 		if err != nil {
 			panic(err)
 		}

@@ -6,6 +6,7 @@ const (
 	SendSignUpPin = "/SendSignUpPin"
 	Login = "/Login"
 	GetUserInfo = "/GetUserInfo"
+	UpdateProfile = "/UpdateProfile"
 )
 
 const (

@@ -31,6 +31,7 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.SendSignUpPin,"SendSignUpPin")
 	b.Handle(iris.MethodPost, utils.Login, "Login")
 	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo", utils.Jwt.Verify)
+	b.Handle(iris.MethodPost, utils.UpdateProfile, "UpdateProfile")
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -141,6 +142,33 @@ func (c *UserController) SendSignUpPin()  {
 	}
 
 	fmt.Printf("\r\n your pin: %s \r\n", pin)
+}
+
+func (c *UserController) UpdateProfile()  {
+	type Param struct {
+		ChatId string
+		Gender model.GenderType
+		DOB string
+		Bio string `validate:"min=20,max=150"`
+	}
+
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	u := &model.User{}
+	u.ChatID = p.ChatId
+	u.Gender = p.Gender
+	u.Bio = p.Bio
+
+	err = c.UserService.UpdateProfile(u)
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, err.Error(), nil)
+	}else {
+		response.Success(c.Ctx, response.Successful, nil)
+	}
 }
 
 func generateToken() (string, error) {

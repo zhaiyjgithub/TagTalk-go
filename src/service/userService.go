@@ -12,6 +12,7 @@ type UserService interface {
 	GetUserByEmail(email string) *model.User
 	GetNearByUsers(chatId string) []*model.User
 	GetUserByChatID(chatId string) *model.User
+	UpdateProfile(user *model.User) error
 }
 
 func NewUserService() UserService {
@@ -40,4 +41,8 @@ func (s *userService) GetNearByUsers(chatId string) []*model.User {
 
 func (s *userService) GetUserByChatID(chatId string) *model.User  {
 	return s.dao.GetUserByChatID(chatId)
+}
+
+func (s *userService)UpdateProfile(user *model.User) error  {
+	return s.dao.UpdateProfile(user)
 }
