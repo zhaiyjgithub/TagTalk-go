@@ -12,6 +12,8 @@ import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/service"
 	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 	"math/rand"
+	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -32,6 +34,8 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.Login, "Login")
 	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo", utils.Jwt.Verify)
 	b.Handle(iris.MethodPost, utils.UpdateProfile, "UpdateProfile")
+	b.Handle(iris.MethodPost, utils.UploadImageWalls, "UploadImageWalls")
+	b.Handle(iris.MethodGet, utils.Avatar, "Avatar")
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -171,6 +175,81 @@ func (c *UserController) UpdateProfile()  {
 	}
 }
 
+func (c *UserController) UploadImageWalls()  {
+	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
+	err := c.Ctx.Request().ParseMultipartForm(maxSize)
+	if err != nil {
+		c.Ctx.StopWithError(iris.StatusInternalServerError, err)
+		return
+	}
+
+	form := c.Ctx.Request().MultipartForm
+	
+	chatIdValues := form.Value["ChatID"]
+	genderValues := form.Value["Gender"]
+	bioValues := form.Value["Bio"]
+
+	if len(chatIdValues[0]) == 0 || len(genderValues[0]) == 0 || len(bioValues[0]) == 0 {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+		return
+	}
+
+	chatId := chatIdValues[0]
+	gender := genderValues[0]
+	bio := bioValues[0]
+
+	if chatIdValues == nil || genderValues == nil || bioValues == nil {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+		return
+	}
+
+	if len(bio) < 20 || len(bio) > 150 {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+	}
+
+	dir := "./src/web/source/avatar/"
+	fullName := ""
+	for _, hs := range form.File {
+		if len(hs) > 0 {
+			fh := hs[0]
+
+			id, _ := strconv.Atoi(chatId)
+			encodeFileName := utils.GenerateFileName(id)
+			ext := filepath.Ext(fh.Filename)
+			fullName = fmt.Sprintf("%s%s", encodeFileName, ext)
+			path := fmt.Sprintf("%s%s", dir, fullName)
+			_, err = c.Ctx.SaveFormFile(fh, path)
+		}
+	}
+
+	u := &model.User{}
+	u.ChatID = chatId
+
+	u.Gender = model.Male
+	if gender != "1" {
+		u.Gender = model.Female
+	}
+	u.Bio = bio
+	u.Avatar = fullName
+
+	err = c.UserService.UpdateProfile(u)
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, err.Error(), nil)
+	}
+
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, "Upload image failed", nil)
+	}else {
+		response.Success(c.Ctx, response.Successful, nil)
+	}
+}
+
+func (c *UserController) Avatar()  {
+	name := c.Ctx.URLParam("name")
+	path := fmt.Sprintf("./src/web/source/avatar/" + name)
+	_ = c.Ctx.ServeFile(path)
+}
+
 func generateToken() (string, error) {
 	var claims jwt.Claims
 	token, err := utils.Jwt.Token(claims)
@@ -198,4 +277,3 @@ func getSignUpPinFromCache(key string) (string, error) {
 	val, err := rdb.Get(contextBg, key).Result()
 	return val, err
 }
-

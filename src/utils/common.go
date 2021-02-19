@@ -1,13 +1,15 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/jwt"
 	"github.com/zhaiyjgithub/TagTalk-go/src/conf"
 	"github.com/zhaiyjgithub/TagTalk-go/src/response"
 	"gopkg.in/gomail.v2"
-	"github.com/kataras/iris/v12/middleware/jwt"
 	"time"
 )
 
@@ -42,5 +44,14 @@ func SendPinEmail(email string, pin string) error {
 	d := gomail.NewDialer(conf.Smtp, 587, conf.ServerEmail, conf.ServerEmailPwd)
 
 	return d.DialAndSend(m)
+}
+
+
+func GenerateFileName(chatId int) string {
+	data := []byte(fmt.Sprintf("%d-%d", chatId, time.Now().Unix()))
+	md5er := md5.New()
+	md5er.Write(data)
+
+	return hex.EncodeToString(md5er.Sum(nil))
 }
 

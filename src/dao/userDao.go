@@ -53,7 +53,8 @@ func (d *UserDao) GetUserByChatID(chatId string) *model.User  {
 }
 
 func (d *UserDao) UpdateProfile(user *model.User) error  {
-	db := d.engine.Model(&model.User{}).Where("chat_id = ?", user.ChatID).Updates(model.User{Gender: user.Gender, Bio: user.Bio})
-
+	db := d.engine.Model(&model.User{}).Where("chat_id = ?", user.ChatID).Updates(model.User{Gender: user.Gender, Bio: user.Bio,
+			Avatar: user.Avatar,
+		})
 	return db.Error
 }

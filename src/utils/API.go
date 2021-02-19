@@ -7,6 +7,8 @@ const (
 	Login = "/Login"
 	GetUserInfo = "/GetUserInfo"
 	UpdateProfile = "/UpdateProfile"
+	UploadImageWalls = "/UploadImageWalls"
+	Avatar = "/Avatar"
 )
 
 const (
