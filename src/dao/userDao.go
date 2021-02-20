@@ -3,6 +3,7 @@ package dao
 import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type UserDao struct {
@@ -47,9 +48,9 @@ func (d *UserDao) GetNearByUsers(chatId string) []*model.User {
 }
 
 func (d *UserDao) GetUserByChatID(chatId string) *model.User  {
-	var u *model.User
+	var u model.User
 	_ = d.engine.Where("chat_id = ?", chatId).Limit(1).Find(&u)
-	return u
+	return &u
 }
 
 func (d *UserDao) UpdateProfile(user *model.User) error  {
@@ -57,4 +58,37 @@ func (d *UserDao) UpdateProfile(user *model.User) error  {
 			Avatar: user.Avatar,
 		})
 	return db.Error
+}
+
+func (d *UserDao) UpdateImageWall(chatId string, names string) error {
+	var w model.Wall
+	db := d.engine.Where("chat_id = ?", chatId).Find(&w)
+
+	nw := &model.Wall{
+		ChatID: chatId,
+		Names: names,
+	}
+
+	if db.Error != nil {
+		db = d.engine.Create(nw)
+	}else {
+		db = d.engine.Save(nw)
+	}
+
+	return db.Error
+}
+
+func (d * UserDao) GetImageWall(chatId string) []string {
+	var wall model.Wall
+	_ = d.engine.Where("chat_id = ?", chatId).Find(&wall)
+
+	nArr := strings.Split(wall.Names, ",")
+	names := make([]string, 0)
+	for _, name := range nArr {
+		if len(name) > 0 {
+			names = append(names, name)
+		}
+	}
+
+	return names
 }

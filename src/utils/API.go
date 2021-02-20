@@ -8,7 +8,9 @@ const (
 	GetUserInfo = "/GetUserInfo"
 	UpdateProfile = "/UpdateProfile"
 	UploadImageWalls = "/UploadImageWalls"
+	ImageWalls = "/ImageWalls"
 	Avatar = "/Avatar"
+	GetImageWall = "/GetImageWall"
 )
 
 const (

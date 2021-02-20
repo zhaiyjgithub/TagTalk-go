@@ -12,13 +12,17 @@ import (
 	"github.com/zhaiyjgithub/TagTalk-go/src/service"
 	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
 const (
 	PinCacheTimeout = 60*time.Second
+	AvatarBaseDir = "./src/web/source/avatar/"
+	ImageWallsBaseDir = "./src/web/source/imagewalls/"
 )
 
 var contextBg = context.Background()
@@ -35,7 +39,9 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo", utils.Jwt.Verify)
 	b.Handle(iris.MethodPost, utils.UpdateProfile, "UpdateProfile")
 	b.Handle(iris.MethodPost, utils.UploadImageWalls, "UploadImageWalls")
+	b.Handle(iris.MethodGet, utils.ImageWalls, "ImageWalls")
 	b.Handle(iris.MethodGet, utils.Avatar, "Avatar")
+	b.Handle(iris.MethodPost, utils.GetImageWall, "GetImageWall")
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -149,33 +155,6 @@ func (c *UserController) SendSignUpPin()  {
 }
 
 func (c *UserController) UpdateProfile()  {
-	type Param struct {
-		ChatId string
-		Gender model.GenderType
-		DOB string
-		Bio string `validate:"min=20,max=150"`
-	}
-
-	var p Param
-	err := utils.ValidateParam(c.Ctx, &p)
-	if err != nil {
-		return
-	}
-
-	u := &model.User{}
-	u.ChatID = p.ChatId
-	u.Gender = p.Gender
-	u.Bio = p.Bio
-
-	err = c.UserService.UpdateProfile(u)
-	if err != nil {
-		response.Fail(c.Ctx, response.Error, err.Error(), nil)
-	}else {
-		response.Success(c.Ctx, response.Successful, nil)
-	}
-}
-
-func (c *UserController) UploadImageWalls()  {
 	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
 	err := c.Ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
@@ -207,7 +186,6 @@ func (c *UserController) UploadImageWalls()  {
 		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
 	}
 
-	dir := "./src/web/source/avatar/"
 	fullName := ""
 	for _, hs := range form.File {
 		if len(hs) > 0 {
@@ -217,7 +195,7 @@ func (c *UserController) UploadImageWalls()  {
 			encodeFileName := utils.GenerateFileName(id)
 			ext := filepath.Ext(fh.Filename)
 			fullName = fmt.Sprintf("%s%s", encodeFileName, ext)
-			path := fmt.Sprintf("%s%s", dir, fullName)
+			path := fmt.Sprintf("%s%s", AvatarBaseDir, fullName)
 			_, err = c.Ctx.SaveFormFile(fh, path)
 		}
 	}
@@ -246,9 +224,103 @@ func (c *UserController) UploadImageWalls()  {
 
 func (c *UserController) Avatar()  {
 	name := c.Ctx.URLParam("name")
-	path := fmt.Sprintf("./src/web/source/avatar/" + name)
+	path := fmt.Sprintf(AvatarBaseDir + name)
 	_ = c.Ctx.ServeFile(path)
 }
+
+func (c *UserController) ImageWalls()  {
+	name := c.Ctx.URLParam("name")
+	path := fmt.Sprintf(ImageWallsBaseDir + name)
+	_ = c.Ctx.ServeFile(path)
+}
+
+func (c *UserController) GetImageWall()  {
+	type Param struct {
+		ChatID string
+	}
+
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	names := c.UserService.GetImageWall(p.ChatID)
+	response.Success(c.Ctx, response.Successful, names)
+}
+
+func (c *UserController) UploadImageWalls()  {
+	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
+	err := c.Ctx.Request().ParseMultipartForm(maxSize)
+	if err != nil {
+		c.Ctx.StopWithError(iris.StatusInternalServerError, err)
+		return
+	}
+
+	form := c.Ctx.Request().MultipartForm
+
+	chatIdValues := form.Value["ChatID"]
+	newImagesValues := form.Value["NewImageNames"]
+	deleteImagesValues := form.Value["DeleteImageNames"]
+
+	if chatIdValues == nil || newImagesValues == nil || deleteImagesValues == nil {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+		return
+	}
+
+	if len(chatIdValues[0]) == 0 || len(newImagesValues) == 0 || len(deleteImagesValues) == 0 {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+		return
+	}
+
+	if len(newImagesValues) == 0 {
+		response.Fail(c.Ctx, response.Error, response.ParamErr, nil)
+		return
+	}
+
+	chatId := chatIdValues[0]
+	err = c.UserService.UpdateImageWall(chatId, newImagesValues[0])
+
+	deleteImages := strings.Split(deleteImagesValues[0], ",")
+	fmt.Println(deleteImages)
+
+	for _, fileName := range deleteImagesValues {
+		if len(fileName) == 0 {
+			continue
+		}
+
+		path := fmt.Sprintf("%s%s", AvatarBaseDir, fileName)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			fmt.Println("file does not exist")
+			continue
+		}
+
+		err := os.Remove(path)
+		if err != nil {
+			fmt.Printf("remove %s failed \r\n")
+		}
+	}
+
+	for _, hs := range form.File {
+		if len(hs) > 0 {
+			fh := hs[0]
+			//id, _ := strconv.Atoi(chatId)
+			//encodeFileName := utils.GenerateFileName(id)
+			//ext := filepath.Ext(fh.Filename)
+			//fullName := fmt.Sprintf("%s%s", encodeFileName, ext)
+			path := fmt.Sprintf("%s%s", ImageWallsBaseDir, fh.Filename)
+			_, err = c.Ctx.SaveFormFile(fh, path)
+		}
+	}
+
+
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, "Upload image failed", nil)
+	}else {
+		response.Success(c.Ctx, response.Successful, nil)
+	}
+ }
+
 
 func generateToken() (string, error) {
 	var claims jwt.Claims

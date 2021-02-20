@@ -13,6 +13,8 @@ type UserService interface {
 	GetNearByUsers(chatId string) []*model.User
 	GetUserByChatID(chatId string) *model.User
 	UpdateProfile(user *model.User) error
+	UpdateImageWall(chatId string, name string) error
+	GetImageWall(chatId string) []string
 }
 
 func NewUserService() UserService {
@@ -45,4 +47,12 @@ func (s *userService) GetUserByChatID(chatId string) *model.User  {
 
 func (s *userService)UpdateProfile(user *model.User) error  {
 	return s.dao.UpdateProfile(user)
+}
+
+func (s *userService) UpdateImageWall(chatId string, name string) error  {
+	return s.dao.UpdateImageWall(chatId, name)
+}
+
+func (s *userService) GetImageWall(chatId string) []string  {
+	return s.dao.GetImageWall(chatId)
 }
