@@ -289,7 +289,7 @@ func (c *UserController) UploadImageWalls()  {
 			continue
 		}
 
-		path := fmt.Sprintf("%s%s", AvatarBaseDir, fileName)
+		path := fmt.Sprintf("%s%s", ImageWallsBaseDir, fileName)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			fmt.Println("file does not exist")
 			continue
@@ -304,10 +304,6 @@ func (c *UserController) UploadImageWalls()  {
 	for _, hs := range form.File {
 		if len(hs) > 0 {
 			fh := hs[0]
-			//id, _ := strconv.Atoi(chatId)
-			//encodeFileName := utils.GenerateFileName(id)
-			//ext := filepath.Ext(fh.Filename)
-			//fullName := fmt.Sprintf("%s%s", encodeFileName, ext)
 			path := fmt.Sprintf("%s%s", ImageWallsBaseDir, fh.Filename)
 			_, err = c.Ctx.SaveFormFile(fh, path)
 		}

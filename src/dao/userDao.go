@@ -69,10 +69,10 @@ func (d *UserDao) UpdateImageWall(chatId string, names string) error {
 		Names: names,
 	}
 
-	if db.Error != nil {
+	if w.ID == 0 {
 		db = d.engine.Create(nw)
 	}else {
-		db = d.engine.Save(nw)
+		db = d.engine.Model(&model.Wall{}).Where("chat_id = ?", chatId).Update("names", names)
 	}
 
 	return db.Error
