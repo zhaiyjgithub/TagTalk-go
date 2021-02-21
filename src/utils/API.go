@@ -11,6 +11,9 @@ const (
 	ImageWalls = "/ImageWalls"
 	Avatar = "/Avatar"
 	GetImageWall = "/GetImageWall"
+	GetTags = "/GetTags"
+	UpdateTags = "/UpdateTags"
+
 )
 
 const (

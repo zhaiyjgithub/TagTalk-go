@@ -42,6 +42,9 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodGet, utils.ImageWalls, "ImageWalls")
 	b.Handle(iris.MethodGet, utils.Avatar, "Avatar")
 	b.Handle(iris.MethodPost, utils.GetImageWall, "GetImageWall")
+	b.Handle(iris.MethodPost, utils.GetTags, "GetTags")
+	b.Handle(iris.MethodPost, utils.UpdateTags, "UpdateTags")
+
 }
 
 func (c *UserController) RegisterNewDoctor()  {
@@ -317,6 +320,40 @@ func (c *UserController) UploadImageWalls()  {
 	}
  }
 
+func (c *UserController) UpdateTags()  {
+	type Param struct {
+		ChatID string
+		Names string
+	}
+
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	err = c.UserService.UpdateTags(p.ChatID, p.Names)
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, "", nil)
+	}else {
+		response.Success(c.Ctx, response.Successful, nil)
+	}
+}
+
+func (c *UserController) GetTags()  {
+	type Param struct {
+		ChatID string
+	}
+
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	ts := c.UserService.GetTags(p.ChatID)
+	response.Success(c.Ctx, response.Successful, ts)
+}
 
 func generateToken() (string, error) {
 	var claims jwt.Claims

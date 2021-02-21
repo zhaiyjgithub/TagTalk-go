@@ -92,3 +92,25 @@ func (d * UserDao) GetImageWall(chatId string) []string {
 
 	return names
 }
+
+func (d* UserDao) UpdateTags(chatId string, names string) error  {
+	var t model.Tag
+	db := d.engine.Where("chat_id = ?", chatId).Find(&t)
+
+	t.ChatID = chatId
+	t.Names = names
+	if t.ID == 0 {
+		db = d.engine.Create(&t)
+	}else {
+		db = d.engine.Where("chat_id = ?", chatId).Update("names", names)
+	}
+
+	return db.Error
+}
+
+func (d *UserDao) GetTags(chatId string) []*model.Tag {
+	var ts []*model.Tag
+	_ = d.engine.Where("chat_id = ?", chatId).Find(&ts)
+
+	return ts
+}
