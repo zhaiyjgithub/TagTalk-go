@@ -1,4 +1,4 @@
-package controller
+package user
 
 import (
 	"context"
@@ -27,16 +27,16 @@ const (
 
 var contextBg = context.Background()
 
-type UserController struct {
+type Controller struct {
 	Ctx iris.Context
 	UserService service.UserService
 }
 
-func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
+func (c *Controller) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.RegisterNewDoctor,"RegisterNewDoctor")
 	b.Handle(iris.MethodPost, utils.SendSignUpPin,"SendSignUpPin")
 	b.Handle(iris.MethodPost, utils.Login, "Login")
-	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo", utils.Jwt.Verify)
+	b.Handle(iris.MethodPost, utils.GetUserInfo, "GetUserInfo")
 	b.Handle(iris.MethodPost, utils.UpdateProfile, "UpdateProfile")
 	b.Handle(iris.MethodPost, utils.UploadImageWalls, "UploadImageWalls")
 	b.Handle(iris.MethodGet, utils.ImageWalls, "ImageWalls")
@@ -44,10 +44,10 @@ func (c *UserController) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.GetImageWall, "GetImageWall")
 	b.Handle(iris.MethodPost, utils.GetTags, "GetTags")
 	b.Handle(iris.MethodPost, utils.UpdateTags, "UpdateTags")
-
+	b.Handle(iris.MethodPost, utils.UpdateAvatar, "UpdateAvatar")
 }
 
-func (c *UserController) RegisterNewDoctor()  {
+func (c *Controller) RegisterNewDoctor()  {
 	type param struct {
 		Name string `validate:"gt=0"`
 		Email string `validate:"email"`
@@ -93,7 +93,7 @@ func (c *UserController) RegisterNewDoctor()  {
 	}
 }
 
-func (c *UserController) Login()  {
+func (c *Controller) Login()  {
 	type Param struct {
 		Email string `validate:"email"`
 		Password string `validate:"min=6,max=20"`
@@ -123,11 +123,20 @@ func (c *UserController) Login()  {
 	}
 }
 
-func (c *UserController) GetUserInfo()  {
-	response.Success(c.Ctx, response.Successful, nil)
+func (c *Controller) GetUserInfo()  {
+	type Param struct {
+		ChatID string
+	}
+	var p Param
+	err := utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+	user:= c.UserService.GetUserByChatID(p.ChatID)
+	response.Success(c.Ctx, response.Successful, &user)
 }
 
-func (c *UserController) SendSignUpPin()  {
+func (c *Controller) SendSignUpPin()  {
 	type Param struct {
 		Email string `validate:"email"`
 	}
@@ -157,7 +166,7 @@ func (c *UserController) SendSignUpPin()  {
 	fmt.Printf("\r\n your pin: %s \r\n", pin)
 }
 
-func (c *UserController) UpdateProfile()  {
+func (c *Controller) UpdateProfile()  {
 	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
 	err := c.Ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
@@ -225,19 +234,19 @@ func (c *UserController) UpdateProfile()  {
 	}
 }
 
-func (c *UserController) Avatar()  {
+func (c *Controller) Avatar()  {
 	name := c.Ctx.URLParam("name")
 	path := fmt.Sprintf(AvatarBaseDir + name)
 	_ = c.Ctx.ServeFile(path)
 }
 
-func (c *UserController) ImageWalls()  {
+func (c *Controller) ImageWalls()  {
 	name := c.Ctx.URLParam("name")
 	path := fmt.Sprintf(ImageWallsBaseDir + name)
 	_ = c.Ctx.ServeFile(path)
 }
 
-func (c *UserController) GetImageWall()  {
+func (c *Controller) GetImageWall()  {
 	type Param struct {
 		ChatID string
 	}
@@ -252,7 +261,7 @@ func (c *UserController) GetImageWall()  {
 	response.Success(c.Ctx, response.Successful, names)
 }
 
-func (c *UserController) UploadImageWalls()  {
+func (c *Controller) UploadImageWalls()  {
 	maxSize := c.Ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
 	err := c.Ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
@@ -311,8 +320,6 @@ func (c *UserController) UploadImageWalls()  {
 			_, err = c.Ctx.SaveFormFile(fh, path)
 		}
 	}
-
-
 	if err != nil {
 		response.Fail(c.Ctx, response.Error, "Upload image failed", nil)
 	}else {
@@ -320,7 +327,7 @@ func (c *UserController) UploadImageWalls()  {
 	}
  }
 
-func (c *UserController) UpdateTags()  {
+func (c *Controller) UpdateTags()  {
 	type Param struct {
 		ChatID string
 		Names string
@@ -340,7 +347,7 @@ func (c *UserController) UpdateTags()  {
 	}
 }
 
-func (c *UserController) GetTags()  {
+func (c *Controller) GetTags()  {
 	type Param struct {
 		ChatID string
 	}

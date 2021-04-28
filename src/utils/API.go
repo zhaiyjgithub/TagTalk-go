@@ -13,6 +13,7 @@ const (
 	GetImageWall = "/GetImageWall"
 	GetTags = "/GetTags"
 	UpdateTags = "/UpdateTags"
+	UpdateAvatar = "/UpdateAvatar"
 
 )
 

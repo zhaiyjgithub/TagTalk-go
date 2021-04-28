@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
@@ -116,13 +117,13 @@ func getRedisKey(likeType LikeType, chatId string) string {
 
 func getChatIDListFromRedisByKey(key string) []string{
 	rd := database.InstanceRedisDB()
-	items, _ := rd.SMembers(contextBg, key).Result()
+	items, _ := rd.SMembers(context.Background(), key).Result()
 	return items
 }
 
 func addChatIDToRedis(key string, item string) {
 	rd := database.InstanceRedisDB()
-	code, err := rd.SAdd(contextBg, key, item).Result()
+	code, err := rd.SAdd(context.Background(), key, item).Result()
 	fmt.Printf("code: %d -- err: %v", code, err)
 }
 

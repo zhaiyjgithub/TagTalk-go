@@ -17,6 +17,7 @@ type UserService interface {
 	GetImageWall(chatId string) []string
 	UpdateTags(chatId string, names string) error
 	GetTags(chatId string) []*model.Tag
+	UpdateAvatar(chatId string, avatar string) error
 }
 
 func NewUserService() UserService {
@@ -65,4 +66,8 @@ func (s *userService) UpdateTags(chatId string, names string) error  {
 
 func (s *userService) GetTags(chatId string) []*model.Tag  {
 	return s.dao.GetTags(chatId)
+}
+
+func (s *userService) UpdateAvatar(chatId string, avatar string) error  {
+	return s.dao.UpdateAvatar(chatId, avatar)
 }

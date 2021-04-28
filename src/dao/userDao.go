@@ -114,3 +114,8 @@ func (d *UserDao) GetTags(chatId string) []*model.Tag {
 
 	return ts
 }
+
+func (d *UserDao) UpdateAvatar(chatId string, avatar string) error {
+	db:= d.engine.Model(&model.User{}).Where("chat_id = ?", chatId).Update("avatar", avatar)
+	return db.Error
+}

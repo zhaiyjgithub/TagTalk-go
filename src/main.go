@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/zhaiyjgithub/TagTalk-go/src/chat"
 	"github.com/zhaiyjgithub/TagTalk-go/src/controller"
+	"github.com/zhaiyjgithub/TagTalk-go/src/controller/user"
 	"github.com/zhaiyjgithub/TagTalk-go/src/service"
 	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 	"net/http"
@@ -55,7 +56,7 @@ func userMVC(app *mvc.Application)  {
 	userService := service.NewUserService()
 
 	app.Register(userService)
-	app.Handle(new(controller.UserController))
+	app.Handle(new(user.Controller))
 }
 
 func matchMVC(app *mvc.Application) {
