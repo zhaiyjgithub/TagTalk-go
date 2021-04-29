@@ -45,6 +45,7 @@ func (c *Controller) BeforeActivation(b mvc.BeforeActivation)  {
 	b.Handle(iris.MethodPost, utils.GetTags, "GetTags")
 	b.Handle(iris.MethodPost, utils.UpdateTags, "UpdateTags")
 	b.Handle(iris.MethodPost, utils.UpdateAvatar, "UpdateAvatar")
+	b.Handle(iris.MethodPost, utils.UpdateBasicProfile, "UpdateBasicProfile")
 }
 
 func (c *Controller) RegisterNewDoctor()  {
@@ -358,8 +359,8 @@ func (c *Controller) GetTags()  {
 		return
 	}
 
-	ts := c.UserService.GetTags(p.ChatID)
-	response.Success(c.Ctx, response.Successful, ts)
+	tag := c.UserService.GetTags(p.ChatID)
+	response.Success(c.Ctx, response.Successful, tag.Names)
 }
 
 func generateToken() (string, error) {

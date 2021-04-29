@@ -14,6 +14,7 @@ const (
 	GetTags = "/GetTags"
 	UpdateTags = "/UpdateTags"
 	UpdateAvatar = "/UpdateAvatar"
+	UpdateBasicProfile = "/UpdateBasicProfile"
 
 )
 

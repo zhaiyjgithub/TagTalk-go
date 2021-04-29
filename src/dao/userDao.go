@@ -94,28 +94,22 @@ func (d * UserDao) GetImageWall(chatId string) []string {
 }
 
 func (d* UserDao) UpdateTags(chatId string, names string) error  {
-	var t model.Tag
-	db := d.engine.Where("chat_id = ?", chatId).Find(&t)
-
-	t.ChatID = chatId
-	t.Names = names
-	if t.ID == 0 {
-		db = d.engine.Create(&t)
-	}else {
-		db = d.engine.Where("chat_id = ?", chatId).Update("names", names)
-	}
-
+	db:= d.engine.Model(&model.Tag{}).Where("chat_id = ?", chatId).Update("names", names)
 	return db.Error
 }
 
-func (d *UserDao) GetTags(chatId string) []*model.Tag {
-	var ts []*model.Tag
-	_ = d.engine.Where("chat_id = ?", chatId).Find(&ts)
-
-	return ts
+func (d *UserDao) GetTags(chatId string) *model.Tag {
+	var tag model.Tag
+	_ = d.engine.Model(&model.Tag{}).Where("chat_id = ?", chatId).Find(&tag)
+	return &tag
 }
 
 func (d *UserDao) UpdateAvatar(chatId string, avatar string) error {
 	db:= d.engine.Model(&model.User{}).Where("chat_id = ?", chatId).Update("avatar", avatar)
+	return db.Error
+}
+
+func (d *UserDao) UpdateBasicProfile(chatId string, user *model.User) error {
+	db:= d.engine.Model(&model.User{}).Where("chat_id = ?", chatId).Updates(&user)
 	return db.Error
 }

@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"github.com/kataras/iris/v12"
+	"github.com/zhaiyjgithub/TagTalk-go/src/model"
 	"github.com/zhaiyjgithub/TagTalk-go/src/response"
 	"github.com/zhaiyjgithub/TagTalk-go/src/utils"
 	"path/filepath"
@@ -38,6 +39,29 @@ func (c *Controller) UpdateAvatar()  {
 			}
 		}
 	}
+	if err != nil {
+		response.Fail(c.Ctx, response.Error, "Upload image failed", nil)
+	}else {
+		response.Success(c.Ctx, response.Successful, nil)
+	}
+}
+
+func (c *Controller) UpdateBasicProfile()  {
+	type Param struct {
+		ChatID string
+		Name string
+		Bio string
+		Gender model.GenderType
+	}
+
+	var p Param
+	err:= utils.ValidateParam(c.Ctx, &p)
+	if err != nil {
+		return
+	}
+
+	user:= &model.User{Name: p.Name, Bio: p.Bio, Gender: p.Gender}
+	err = c.UserService.UpdateBasicProfile(p.ChatID, user)
 	if err != nil {
 		response.Fail(c.Ctx, response.Error, "Upload image failed", nil)
 	}else {
